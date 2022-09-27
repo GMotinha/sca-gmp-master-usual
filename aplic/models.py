@@ -1,4 +1,11 @@
+import uuid
+from stdimage.models import StdImageField
 from django.db import models
+
+def get_file_path(_instance, filename):
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+    return filename
 
 
 class Curso(models.Model):
@@ -16,6 +23,8 @@ class Curso(models.Model):
 
 class Pessoa(models.Model):
     nome = models.CharField('Nome', max_length=100)
+    foto = StdImageField('Foto', null=True, blank=True, upload_to=get_file_path,
+                         variations={'thumb': {'width': 480, 'height': 480, 'crop': True}})
 
     class Meta:
         abstract = True
@@ -48,8 +57,9 @@ class Aluno(Pessoa):
     curso = models.ForeignKey(Curso, on_delete=models.DO_NOTHING)
 
     class Meta:
-        verbose_name='Aluno'
-        verbose_name_plural='Alunos'
+        verbose_name = 'Aluno'
+        verbose_name_plural = 'Alunos'
+
 
 class Disciplina(models.Model):
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
@@ -60,17 +70,18 @@ class Disciplina(models.Model):
     bibliografia = models.TextField('Bibliografia', blank=True, max_length=500)
 
     class Meta:
-        verbose_name='Disciplina'
-        verbose_name_plural='Disciplinas'
+        verbose_name = 'Disciplina'
+        verbose_name_plural = 'Disciplinas'
 
     def __str__(self):
         return self.nome
+
 
 class Turma(models.Model):
     ano = models.IntegerField('Ano')
     semestre = models.IntegerField('Semestre')
     turma = models.CharField('Turma', max_length=10)
-    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE)
+    disciplina = models.ForeignKey(Disciplina, null=True, on_delete=models.CASCADE)
     professor = models.ForeignKey(Professor, null=True, on_delete=models.SET_NULL)
     alunos = models.ManyToManyField(Aluno)
 
@@ -79,5 +90,4 @@ class Turma(models.Model):
         verbose_name_plural = 'Turmas'
 
     def __str__(self):
-       return f"{self.ano} / {self.semestre} / {self.turma} / {self.disciplina}"
-
+        return f"{self.ano} / {self.semestre} / {self.turma} / {self.disciplina}"
