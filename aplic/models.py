@@ -51,6 +51,7 @@ class Professor(Pessoa):
     titulacao = models.CharField('Titulação', blank=True, max_length=100, choices=OPCOES)
     curso = models.ForeignKey(Curso, null=True, on_delete=models.SET_NULL)
 
+
     class Meta:
         verbose_name = 'Professor'
         verbose_name_plural = 'Professores'
