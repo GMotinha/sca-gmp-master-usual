@@ -1,6 +1,9 @@
 from django.views.generic import TemplateView, ListView
 from .models import Professor, Disciplina
 from .models import Curso
+from django.db.models import Count
+from chartjs.views.lines import BaseLineChartView
+
 
 class IndexView(TemplateView):
     template_name = 'index.html'
@@ -37,3 +40,20 @@ class CursoDetalheView(ListView):
     def get_queryset(self, **kwargs):
         id = self.kwargs['id']
         return Disciplina.objects.filter(curso_id=id)
+
+class DadosGraficoAlunosView(BaseLineChartView):
+    def get_labels(self):
+        labels = []
+        queryset = Curso.objects.order_by('id')
+        for curso in queryset:
+            labels.append(curso.nome)
+        return labels
+
+    def get_data(self):
+        resultado = []
+        dados = []
+        queryset = Curso.objects.order_by('id').annotate(total=Count('aluno'))
+        for linha in queryset:
+            dados.append(int(linha.total))
+        resultado.append(dados)
+        return resultado
